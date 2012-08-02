@@ -8,7 +8,7 @@
     "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)"]
 , "keywords"        : 
   ["couchbase", "request", "json", "nosql", "micro", "baseview", "database"]
-, "dependencies"    : { "request": "2.9.x", "errs": "*" }
+, "dependencies"    : { "request": "2.9.x", "errs": "0.2.x" }
 , "main"            : "./baseview.js"
 , "engines"         : { "node": ">=0.3.6" }
 }
