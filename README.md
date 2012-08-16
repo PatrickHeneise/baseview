@@ -10,10 +10,19 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
 
   ...
 
+  // retrieve data from a view
   baseview.view('design_doc', 'view_name', function(error, data) {
     console.log(error, data);
   });
+  
+  // retrieve data from a spatial index with boundix box.
+  // see sparta for bbox calculations
+  baseview.spatial('geo', 'points', {bbox: bbox}, function(error, points) {
+    console.log(error, points);
+  });
 ```
+
+To create a geographical bounding box (bbox), have a look at [sparta](https://github.com/PatrickHeneise/sparta), a small library for geo calculations.
 
 ## example with socket.io
 ````js
