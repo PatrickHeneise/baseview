@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/PatrickHeneise/baseview.png)](http://travis-ci.org/PatrickHeneise/baseview)
 # baseview
 
 `baseview` is a minimalistic CouchBase client for node.js based on the minimalistic CouchDB driver [nano][1].
