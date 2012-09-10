@@ -25,6 +25,22 @@ var request = require('request')
   , u = require('url');
 
 module.exports = baseview = function (cfg) {
+
+    if(typeof cfg === "string") {
+        if(/^https?:/.test(cfg)) { cfg = {url: cfg}; } // url
+        else {
+            try { cfg   = require(cfg); } // file path
+            catch(e) {
+                e.message = "couldn't read config file " +
+                    (cfg ? cfg.toString() : '');
+                throw error.init(e, "badfile");
+            }
+        }
+    }
+
+    var _bucket = cfg && cfg.bucket || "default";
+    var _url = cfg && cfg.url || "http://127.0.0.1:8092";
+
   function isEmpty(object) {
     for(var property in object) {
       if(object.hasOwnProperty(property)) return false; }
@@ -39,7 +55,7 @@ module.exports = baseview = function (cfg) {
                   }
       , req     = { method : (opts.method || "GET")
                   , headers: headers
-                  , uri    : cfg.url }
+                  , uri    : _url }
       , params  = opts.params
       , status_code
       , parsed
@@ -129,7 +145,7 @@ module.exports = baseview = function (cfg) {
         callback = params;
         params   = {};
       }
-      var view_path = 'default/_design/' + design_name + '/_view/'  + view_name;
+      var view_path = _bucket + '/_design/' + design_name + '/_view/'  + view_name;
       if (params.keys) {
         var body = {keys: params.keys};
         delete params.keys;
@@ -147,7 +163,7 @@ module.exports = baseview = function (cfg) {
         callback = params;
         params   = {};
       }
-      var view_path = 'default/_design/' + design_name + '/_spatial/'  + view_name;
+      var view_path = _bucket + '/_design/' + design_name + '/_spatial/'  + view_name;
       if (params.keys) {
         var body = {keys: params.keys};
         delete params.keys;
@@ -159,18 +175,8 @@ module.exports = baseview = function (cfg) {
                      , method: "GET", params: params},callback);
       }
   }
-  
-  if(typeof cfg === "string") {
-    if(/^https?:/.test(cfg)) { cfg = {url: cfg}; } // url
-    else {
-      try { cfg   = require(cfg); } // file path
-      catch(e) {
-        e.message = "couldn't read config file " + 
-          (cfg ? cfg.toString() : '');
-        throw error.init(e, "badfile");
-      }
-    }
-  }
+
+
   
   return {
     view: view_docs,

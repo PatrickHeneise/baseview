@@ -7,7 +7,8 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
 # usage
 ``` js
   baseview = require('baseview')('http://127.0.0.1:8092')
-
+  or
+  baseview = require('baseview')({url: 'http://127.0.0.1:8092', bucket: 'my_bucket'})
   ...
 
   // retrieve data from a view
