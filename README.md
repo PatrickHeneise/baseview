@@ -7,7 +7,8 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
 # usage
 ``` js
   baseview = require('baseview')('http://127.0.0.1:8092')
-
+  or
+  baseview = require('baseview')({url: 'http://127.0.0.1:8092', bucket: 'my_bucket'})
   ...
 
   // retrieve data from a view
@@ -19,6 +20,31 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
   // see sparta for bbox calculations
   baseview.spatial('geo', 'points', {bbox: bbox}, function(error, points) {
     console.log(error, points);
+  });
+
+  //adding a design document
+  baseView.setDesign('design_doc',
+              {
+                  'names':{
+                      'map': "function(doc){if(doc.name){emit(doc.name);}}"
+                  },
+                  'rating': {
+                      'map': "function(doc){if(doc.name && doc.rating){emit(doc.rating);}}"
+                  }
+              },
+              function(err, res){
+              //handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-storing.html
+              }
+          );
+
+  // retrieve a design document
+  baseView.getDesign('design_doc', function(err,res){
+        // http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-retrieving.html
+    });
+
+  // delete a design document
+  baseView.deleteDesign('design_doc', function(err, res){
+       // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-deleting.html
   });
 ```
 
