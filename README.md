@@ -16,35 +16,34 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
     console.log(error, data);
   });
   
-  // retrieve data from a spatial index with boundix box.
-  // see sparta for bbox calculations
+  // retrieve data from a spatial index with bounding box.
+  // see 'sparta' for bbox calculations
   baseview.spatial('geo', 'points', {bbox: bbox}, function(error, points) {
     console.log(error, points);
   });
 
   //adding a design document
-  baseView.setDesign('design_doc',
-              {
-                  'names':{
-                      'map': "function(doc){if(doc.name){emit(doc.name);}}"
-                  },
-                  'rating': {
-                      'map': "function(doc){if(doc.name && doc.rating){emit(doc.rating);}}"
-                  }
-              },
-              function(err, res){
-              //handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-storing.html
-              }
-          );
+  baseview.setDesign('design_doc', {
+     'names': {
+        'map': "function(doc){if(doc.name){emit(doc.name);}}"
+      },
+      'rating': {
+        'map': "function(doc){if(doc.name && doc.rating){emit(doc.rating);}}"
+      }
+    },
+    function(err, res){
+      // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-storing.html
+    }
+  );
 
   // retrieve a design document
-  baseView.getDesign('design_doc', function(err,res){
-        // http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-retrieving.html
-    });
+  baseview.getDesign('design_doc', function(err,res) {
+    // http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-retrieving.html
+  });
 
   // delete a design document
-  baseView.deleteDesign('design_doc', function(err, res){
-       // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-deleting.html
+  baseview.deleteDesign('design_doc', function(err, res) {
+    // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-deleting.html
   });
 ```
 

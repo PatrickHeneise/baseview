@@ -5,7 +5,9 @@
 , "version"         : "0.0.1"
 , "author"          : "Patrick Heneise <@PatrickHeneise>"
 , "contributors"    : [
-    "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)"]
+    "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)"
+  , "Peter Klaesson (https://github.com/alphapeter)"
+  ]
 , "keywords"        : 
   ["couchbase", "request", "json", "nosql", "micro", "baseview", "database"]
 , "dependencies"    : { "request": "2.9.x", "errs": "0.2.x" }

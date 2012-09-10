@@ -207,10 +207,10 @@ module.exports = baseview = function (cfg) {
 
         if(e) {
           errs.handle(errs.merge(e,
-             { "message": "error happened in your connection"
-             , "scope"  : "socket"
-             , "errid"  : "request"
-             }), callback);
+            {   "message": "error happened in your connection"
+              , "scope"  : "socket"
+              , "errid"  : "request"
+            }), callback);
           return stream;
         }
 
@@ -250,59 +250,51 @@ module.exports = baseview = function (cfg) {
     }
   }
   
-  
   function view_docs(design_name,view_name,params,callback) {
-      if(typeof params === "function") {
-        callback = params;
-        params   = {};
-      }
-      var view_path = _bucket + '/_design/' + design_name + '/_view/'  + view_name;
-      if (params.keys) {
-        var body = {keys: params.keys};
-        delete params.keys;
-        return relax({ path: view_path
-                     , method: "POST", params: params, body: body}, callback);
-      }
-      else {
-        return relax({path: view_path
-                     , method: "GET", params: params},callback);
-      }
+    if(typeof params === "function") {
+      callback = params;
+      params   = {};
+    }
+    var view_path = _bucket + '/_design/' + design_name + '/_view/'  + view_name;
+    if (params.keys) {
+      var body = {keys: params.keys};
+      delete params.keys;
+      return relax({ path: view_path, method: "POST", params: params, body: body}, callback);
+    }
+    else {
+      return relax({path: view_path, method: "GET", params: params}, callback);
+    }
   }
   
   function view_spatial(design_name,view_name,params,callback) {
-      if(typeof params === "function") {
-        callback = params;
-        params   = {};
-      }
-      var view_path = _bucket + '/_design/' + design_name + '/_spatial/'  + view_name;
-      if (params.keys) {
-        var body = {keys: params.keys};
-        delete params.keys;
-        return relax({ path: view_path
-                     , method: "POST", params: params, body: body}, callback);
-      }
-      else {
-        return relax({path: view_path
-                     , method: "GET", params: params},callback);
+    if(typeof params === "function") {
+      callback = params;
+      params   = {};
+    }
+    var view_path = _bucket + '/_design/' + design_name + '/_spatial/'  + view_name;
+    if (params.keys) {
+      var body = {keys: params.keys};
+      delete params.keys;
+      return relax({ path: view_path, method: "POST", params: params, body: body}, callback);
+    }
+    else {
+      return relax({path: view_path, method: "GET", params: params}, callback);
       }
   }
   
   function set_design(design_name, views, callback){
     var view_path = _bucket + '/_design/' + design_name;
-    return relax({ path: view_path
-        , method: "PUT", body: {views: views}}, callback);
+    return relax({ path: view_path, method: "PUT", body: {views: views}}, callback);
   }
 
   function get_design(design_name, callback){
     var view_path = _bucket + '/_design/' + design_name;
-    return relax({ path: view_path
-        , method: "GET"}, callback);
+    return relax({ path: view_path, method: "GET"}, callback);
   }
 
   function delete_design(design_name, callback){
     var view_path = _bucket + '/_design/' + design_name;
-    return relax({ path: view_path
-        , method: "DELETE"}, callback);
+    return relax({ path: view_path, method: "DELETE"}, callback);
   }
 
   return {
