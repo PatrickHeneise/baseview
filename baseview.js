@@ -21,25 +21,23 @@
 var request = require('request')
   , qs = require('querystring')
   , error = require('errs')
-  , logging = require('./logging')
   , u = require('url');
 
 module.exports = baseview = function (cfg) {
-
-    if(typeof cfg === "string") {
-        if(/^https?:/.test(cfg)) { cfg = {url: cfg}; } // url
-        else {
-            try { cfg   = require(cfg); } // file path
-            catch(e) {
-                e.message = "couldn't read config file " +
-                    (cfg ? cfg.toString() : '');
-                throw error.init(e, "badfile");
-            }
-        }
+  if(typeof cfg === "string") {
+    if(/^https?:/.test(cfg)) { cfg = {url: cfg}; } // url
+    else {
+      try { cfg   = require(cfg); } // file path
+      catch(e) {
+        e.message = "couldn't read config file " +
+          (cfg ? cfg.toString() : '');
+        throw error.init(e, "badfile");
+      }
     }
+  }
 
-    var _bucket = cfg && cfg.bucket || "default";
-    var _url = cfg && cfg.url || "http://127.0.0.1:8092";
+  var _bucket = cfg && cfg.bucket || "default";
+  var _url = cfg && cfg.url || "http://127.0.0.1:8092";
 
   function isEmpty(object) {
     for(var property in object) {
@@ -48,48 +46,114 @@ module.exports = baseview = function (cfg) {
   }
 
   function relax(opts,callback) {
-    if(typeof opts === 'string') { opts = {path: opts}; }
-    var log = logging();
-    var headers = { "content-type": "application/json"
+    // most simple case is no opts, which returns the root
+    if(typeof opts === "function") {
+      callback = opts;
+      opts     = {path: ""};
+    }
+
+    // string is the same as a simple get request to that path
+    if(typeof opts === 'string') {
+      opts = {path: opts};
+    }
+
+    // no opts, meaning stream root
+    if(!opts) {
+      opts     = {path: ""};
+      callback = null;
+    }
+    
+    var params  = opts.params
+      , headers = { "content-type": "application/json"
                   , "accept"      : "application/json"
-                  }
-      , req     = { method : (opts.method || "GET")
-                  , headers: headers
-                  , uri    : _url }
-      , params  = opts.params
+                }
+      , req     = { method  : (opts.method || "GET")
+                , headers : headers
+                , uri     : cfg.url }
       , status_code
       , parsed
       , rh;
+    
 
-    if(opts.path) { req.uri += "/" + opts.path; }
+    if (opts.headers) {
+      for (var k in opts.headers) {
+        req.headers[k] = opts.headers[k];
+      }
+    }
+
+    if(opts.path) {
+      req.uri += "/" + opts.path;
+    }
+    else if(opts.doc)  {
+      // not a design document
+      if(!/^_design/.test(opts.doc)) {
+        try {
+          req.uri += "/" + encodeURIComponent(opts.doc);
+        }
+        catch (error) {
+          return errs.handle(errs.merge(error,
+            { "message": "couldnt encode: "+(opts && opts.doc)+" as an uri"
+            , "scope"  : "nano"
+            , "errid"  : "encode_uri"
+            }), callback);
+        }
+      }
+      else {
+        // design document
+        req.uri += "/" + opts.doc;
+      }
+
+      if(opts.att) {
+        req.uri += "/" + opts.att;
+      }
+    }
+
     if(opts.encoding !== undefined && callback) {
       req.encoding = opts.encoding;
       delete req.headers["content-type"];
       delete req.headers.accept;
     }
+
+    if(opts.content_type) {
+      req.headers["content-type"] = opts.content_type;
+      delete req.headers.accept; // undo headers set
+    }
+
+    // these need to be encoded
     if(!isEmpty(params)) {
-      ['startkey', 'endkey', 'key', 'keys'].forEach(function (key) {
-        if (key in params) {
-          try { params[key] = JSON.stringify(params[key]); }
-          catch (ex2) { 
-            ex2.message = 'bad params: ' + key + ' = ' + params[key];
-            return new Error(ex, 'jsonstringify', {}); 
-          }
-        }
-      });
-      try { req.uri += "?" + qs.stringify(params); }
-      catch (ex3) {
-        ex3.message = 'invalid params: ' + params.toString();
-        return error.request_err(ex3, 'qsstringify', {});
-      }
-    }
-    if(!callback) { // void callback, stream
       try {
-        return request(req);
-      } catch (ex4) { 
-        return error.request_err(ex4, 'streamthrow', {});
+        ['startkey', 'endkey', 'key', 'keys'].forEach(function (key) {
+          if (key in params) {
+            try { params[key] = JSON.stringify(params[key]); }
+            catch (err) {
+              return errs.handle(errs.merge(err,
+                { "message": "bad params: " + key + " = " + params[key]
+                , "scope"  : "nano"
+                , "errid"  : "encode_keys"
+                }), callback);
+            }
+          }
+        });
+      } catch (err6) {
+        return errs.handle(errs.merge(err6,
+          { "messsage": "params is not an object"
+          , "scope"   : "nano"
+          , "errid"   : "bad_params"
+          }), callback);
+      }
+
+      try {
+        req.uri += "?" + qs.stringify(params);
+      }
+      catch (err2) {
+        return errs.handle(errs.merge(err2,
+           { "message": "invalid params: " + params.toString()
+           , "scope"  : "nano"
+           , "errid"  : "encode_params"
+           }), callback);
       }
     }
+
     if(opts.body) {
       if (Buffer.isBuffer(opts.body)) {
         req.body = opts.body; // raw data
@@ -97,48 +161,95 @@ module.exports = baseview = function (cfg) {
       else {
         try {
           req.body = JSON.stringify(opts.body, function (key, value) {
+            // don't encode functions
+            // this allows functions to be given without pre-escaping
             if (typeof(value) === 'function') {
               return value.toString();
             } else {
               return value;
             }
           });
-        } catch (ex5) { 
-          ex5.message = "couldn't json.stringify the body you provided";
-          return error.request_err(ex5, 'jsonstringify', {}, callback);
+        } catch (err3) {
+          return errs.handle(errs.merge(err3,
+             { "message": "body seems to be invalid json"
+             , "scope"  : "nano"
+             , "errid"  : "encode_body"
+             }), callback);
         }
       } // json data
     }
-    log(req);
+
+    if(opts.form) {
+      req.headers['content-type'] = 
+        'application/x-www-form-urlencoded; charset=utf-8';
+      req.body = qs.stringify(opts.form).toString('utf8');
+    }
+
+    // streaming mode
+    if(!callback) {
+      try {
+        return request(req);
+      } catch (err4) {
+        return errs.handle(errs.merge(err4,
+           { "message": "request threw when you tried to stream"
+           , "scope"  : "request"
+           , "errid"  : "stream"
+           }), callback);
+      }
+    }
+
     try {
-      var stream = request(req, function(e,h,b){
+      var stream = request(req, function(e,h,b) {
+        // make sure headers exist
         rh = (h && h.headers || {});
         rh['status-code'] = status_code = (h && h.statusCode || 500);
         rh.uri            = req.uri;
+
         if(e) {
-          log({err: 'socket', body: b, headers: rh });
-          callback(new Error(e,"socket",req,status_code),b,rh);
+          errs.handle(errs.merge(e,
+             { "message": "error happened in your connection"
+             , "scope"  : "socket"
+             , "errid"  : "request"
+             }), callback);
           return stream;
         }
+
+        delete rh.server;
+        delete rh['content-length'];
+
         try { parsed = JSON.parse(b); } catch (err) { parsed = b; }
-        if (status_code >= 200 && status_code < 300) {
-          log({err: null, body: parsed, headers: rh});
+
+        if (status_code >= 200 && status_code < 400) {
           callback(null,parsed,rh);
           return stream;
         }
         else { // proxy the error directly from couchdb
-          log({err: 'couch', body: parsed, headers: rh});
           if (!parsed) { parsed = {}; }
-          callback(new Error(parsed.reason,parsed.error,req,status_code),
-            parsed, rh);
+          if (!parsed.message && (parsed.reason || parsed.error)) {
+            parsed.message = (parsed.reason || parsed.error);
+          }
+          errs.handle(errs.merge(errs.create(parsed),
+             { "scope"       : "couch"
+             , "status_code" : status_code
+             , "status-code" : status_code
+             , "request"     : req
+             , "headers"     : rh
+             , "errid"       : "non_200"
+             , "message"     : parsed.reason || "couch returned "+status_code
+             }), callback);
           return stream;
         }
       });
       return stream;
-    } catch(ex6) { 
-      return new Error(ex6, 'callbackthrow', {});
+    } catch(err5) {
+      return errs.merge(err5,
+         { "message": "request threw when you tried to create the object"
+         , "scope"  : "request"
+         , "errid"  : "callback"
+         });
     }
   }
+  
   
   function view_docs(design_name,view_name,params,callback) {
       if(typeof params === "function") {
@@ -175,29 +286,30 @@ module.exports = baseview = function (cfg) {
                      , method: "GET", params: params},callback);
       }
   }
-    function set_design(design_name, views, callback){
-        var view_path = _bucket + '/_design/' + design_name;
-        return relax({ path: view_path
-            , method: "PUT", body: {views: views}}, callback);
-    }
+  
+  function set_design(design_name, views, callback){
+    var view_path = _bucket + '/_design/' + design_name;
+    return relax({ path: view_path
+        , method: "PUT", body: {views: views}}, callback);
+  }
 
-    function get_design(design_name, callback){
-        var view_path = _bucket + '/_design/' + design_name;
-        return relax({ path: view_path
-            , method: "GET"}, callback);
-    }
+  function get_design(design_name, callback){
+    var view_path = _bucket + '/_design/' + design_name;
+    return relax({ path: view_path
+        , method: "GET"}, callback);
+  }
 
-    function delete_design(design_name, callback){
-        var view_path = _bucket + '/_design/' + design_name;
-        return relax({ path: view_path
-            , method: "DELETE"}, callback);
-    }
+  function delete_design(design_name, callback){
+    var view_path = _bucket + '/_design/' + design_name;
+    return relax({ path: view_path
+        , method: "DELETE"}, callback);
+  }
 
   return {
-      view: view_docs,
-      spatial: view_spatial,
-      setDesign: set_design,
-      getDesign: get_design,
-      deleteDesign: delete_design
+    view: view_docs,
+    spatial: view_spatial,
+    setDesign: set_design,
+    getDesign: get_design,
+    deleteDesign: delete_design
   }
 };
