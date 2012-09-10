@@ -23,7 +23,7 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
   });
 
   //adding a design document
-  baseView.setDesign('users',
+  baseView.setDesign('design_doc',
               {
                   'names':{
                       'map': "function(doc){if(doc.name){emit(doc.name);}}"
@@ -38,12 +38,12 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
           );
 
   // retrieve a design document
-  baseView.getDesign('users', function(err,res){
+  baseView.getDesign('design_doc', function(err,res){
         // http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-retrieving.html
     });
 
   // delete a design document
-  baseView.deleteDesign('users', function(err, res){
+  baseView.deleteDesign('design_doc', function(err, res){
        // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-deleting.html
   });
 ```
