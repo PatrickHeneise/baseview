@@ -21,6 +21,31 @@ CouchBase provides view data as JSON, which can be accessed and streamed with th
   baseview.spatial('geo', 'points', {bbox: bbox}, function(error, points) {
     console.log(error, points);
   });
+
+  //adding a design document
+  baseView.setDesign('users',
+              {
+                  'names':{
+                      'map': "function(doc){if(doc.name){emit(doc.name);}}"
+                  },
+                  'rating': {
+                      'map': "function(doc){if(doc.name && doc.rating){emit(doc.rating);}}"
+                  }
+              },
+              function(err, res){
+              //handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-storing.html
+              }
+          );
+
+  // retrieve a design document
+  baseView.getDesign('users', function(err,res){
+        // http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-retrieving.html
+    });
+
+  // delete a design document
+  baseView.deleteDesign('users', function(err, res){
+       // handle error http://www.couchbase.com/docs/couchbase-manual-2.0/couchbase-views-designdoc-api-deleting.html
+  });
 ```
 
 To create a geographical bounding box (bbox), have a look at [sparta](https://github.com/PatrickHeneise/sparta), a small library for geo calculations.

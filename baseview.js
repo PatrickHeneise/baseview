@@ -175,11 +175,29 @@ module.exports = baseview = function (cfg) {
                      , method: "GET", params: params},callback);
       }
   }
+    function set_design(design_name, views, callback){
+        var view_path = _bucket + '/_design/' + design_name;
+        return relax({ path: view_path
+            , method: "PUT", body: {views: views}}, callback);
+    }
 
+    function get_design(design_name, callback){
+        var view_path = _bucket + '/_design/' + design_name;
+        return relax({ path: view_path
+            , method: "GET"}, callback);
+    }
 
-  
+    function delete_design(design_name, callback){
+        var view_path = _bucket + '/_design/' + design_name;
+        return relax({ path: view_path
+            , method: "DELETE"}, callback);
+    }
+
   return {
-    view: view_docs,
-    spatial: view_spatial
+      view: view_docs,
+      spatial: view_spatial,
+      setDesign: set_design,
+      getDesign: get_design,
+      deleteDesign: delete_design
   }
 };
