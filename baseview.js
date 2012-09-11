@@ -20,7 +20,7 @@
   */
 var request = require('request')
   , qs = require('querystring')
-  , error = require('errs')
+  , errs = require('errs')
   , u = require('url');
 
 module.exports = baseview = function (cfg) {
@@ -266,7 +266,7 @@ module.exports = baseview = function (cfg) {
     }
   }
   
-  function view_spatial(design_name,view_name,params,callback) {
+  function view_spatial(design_name, view_name, params, callback) {
     if(typeof params === "function") {
       callback = params;
       params   = {};
@@ -282,17 +282,22 @@ module.exports = baseview = function (cfg) {
       }
   }
   
-  function set_design(design_name, views, callback){
+  function set_design(design_name, views, callback) {
     var view_path = _bucket + '/_design/' + design_name;
     return relax({ path: view_path, method: "PUT", body: {views: views}}, callback);
   }
+  
+  function set_spatial(design_name, geoview, callback) {
+    var view_path = _bucket + '/_design/' + design_name;
+    return relax({ path: view_path, method: "PUT", body: {views: {}, spatial: geoview}}, callback);
+  }
 
-  function get_design(design_name, callback){
+  function get_design(design_name, spatial, callback) {
     var view_path = _bucket + '/_design/' + design_name;
     return relax({ path: view_path, method: "GET"}, callback);
   }
 
-  function delete_design(design_name, callback){
+  function delete_design(design_name, callback) {
     var view_path = _bucket + '/_design/' + design_name;
     return relax({ path: view_path, method: "DELETE"}, callback);
   }
@@ -300,6 +305,7 @@ module.exports = baseview = function (cfg) {
   return {
     view: view_docs,
     spatial: view_spatial,
+    setSpatialDesign: set_spatial,
     setDesign: set_design,
     getDesign: get_design,
     deleteDesign: delete_design

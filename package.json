@@ -14,7 +14,7 @@
 , "devDependencies" : { 
     "async"         : "0.1.x"
   , "specify"       : "0.6.x"
-  , "nock"          : "0.13.x"
+  , "memcache"      : "*"
 }
 , "scripts"         : { "test"          : "node node_modules/specify/bin/specify -e NOCK=on"}
 , "main"            : "./baseview.js"
