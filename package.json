@@ -2,7 +2,7 @@
 , "description"     : "minimalistic couchbase view client for node.js"
 , "homepage"        : "http://about.me/PatrickHeneise"
 , "repository"      : "git://github.com/PatrickHeneise/baseview.git"
-, "version"         : "0.0.1"
+, "version"         : "0.0.2"
 , "author"          : "Patrick Heneise <@PatrickHeneise>"
 , "contributors"    : [
     "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)"
@@ -11,6 +11,12 @@
 , "keywords"        : 
   ["couchbase", "request", "json", "nosql", "micro", "baseview", "database"]
 , "dependencies"    : { "request": "2.9.x", "errs": "0.2.x" }
+, "devDependencies" : { 
+    "async"         : "0.1.x"
+  , "specify"       : "0.6.x"
+  , "nock"          : "0.13.x"
+}
+, "scripts"         : { "test"          : "node node_modules/specify/bin/specify -e NOCK=on"}
 , "main"            : "./baseview.js"
 , "engines"         : { "node": ">=0.3.6" }
 }
