@@ -2,7 +2,7 @@
 , "description"     : "minimalistic couchbase view client for node.js"
 , "homepage"        : "http://about.me/PatrickHeneise"
 , "repository"      : "git://github.com/PatrickHeneise/baseview.git"
-, "version"         : "0.0.2"
+, "version"         : "0.0.3"
 , "author"          : "Patrick Heneise <@PatrickHeneise>"
 , "contributors"    : [
     "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)"
