@@ -14,9 +14,6 @@
   * without warranties or conditions of any kind, either express or implied.
   * see the license for the specific language governing permissions and
   * limitations under the license.
-  *
-  * @author Patrick Heneise, @PatrickHeneise
-  * @license http://www.opensource.org/licenses/mit-license.html MIT License
   */
 var request = require('request')
   , qs = require('querystring')
@@ -197,6 +194,8 @@ module.exports = baseview = function (cfg) {
            }), callback);
       }
     }
+    
+    //console.log(req);
 
     try {
       var stream = request(req, function(e,h,b) {
@@ -292,7 +291,7 @@ module.exports = baseview = function (cfg) {
     return relax({ path: view_path, method: "PUT", body: {views: {}, spatial: geoview}}, callback);
   }
 
-  function get_design(design_name, spatial, callback) {
+  function get_design(design_name, callback) {
     var view_path = _bucket + '/_design/' + design_name;
     return relax({ path: view_path, method: "GET"}, callback);
   }
