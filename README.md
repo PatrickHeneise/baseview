@@ -59,16 +59,9 @@ To create a geographical bounding box (bbox), have a look at [sparta](https://gi
 ````
 
 # tests
-    /tests/tests.js
-    
-    ✔ 2/2 baseview:setup 
-    ✔ 3/3 baseview:setDesignDocument 
-    ✔ 2/2 baseview:getDesignDocument 
-    ✔ 3/3 baseview:testView 
-    ✔ 3/3 baseview:setSpatialView 
-    ✔ 2/2 baseview:getSpatialView 
-    ✔ 3/3 baseview:testSpatialView 
-    ✗ 1/4 baseview:deleteDesign (500 server error, working on it)
+Tests are written in specify. To run the tests, execute:
+    node tests/views.js
+    node tests/spatial.js
 
 
 # contribute
