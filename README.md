@@ -60,6 +60,7 @@ To create a geographical bounding box (bbox), have a look at [sparta](https://gi
 
 # tests
 Tests are written in specify. To run the tests, execute:
+
     node tests/views.js
     node tests/spatial.js
 
