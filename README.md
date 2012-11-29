@@ -64,6 +64,7 @@ Tests are written in specify. To run the tests, execute:
     node tests/views.js
     node tests/spatial.js
 
+[![Build Status](https://secure.travis-ci.org/PatrickHeneise/baseview.png)](http://travis-ci.org/PatrickHeneise/baseview)
 
 # contribute
 
